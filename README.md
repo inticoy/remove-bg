@@ -58,6 +58,7 @@ wget https://github.com/danielgatis/rembg/releases/download/v0.0.0/u2net_quant.o
 
 # Start development server
 pnpm dev
+# → http://localhost:5173/
 
 # Build for production
 pnpm build
@@ -67,6 +68,18 @@ pnpm preview
 ```
 
 > **Note**: MediaPipe works out of the box (loaded from CDN). U2-Net requires downloading the model file first.
+
+## Deployment
+
+GitHub Actions automatically deploys to GitHub Pages when you push to the main branch:
+
+```bash
+git add .
+git commit -m "Your commit message"
+git push origin main
+```
+
+The site will be available at `https://[username].github.io/remove-bg/`
 
 ## Project Structure
 
