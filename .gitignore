@@ -12,9 +12,8 @@ dist
 dist-ssr
 *.local
 
-# ONNX model files (large files)
-public/models/*.onnx
-public/models/*.onnx.*
+# ONNX model files are tracked by Git LFS
+# No need to ignore them anymore
 
 # Editor directories and files
 .vscode/*
