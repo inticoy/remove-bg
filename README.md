@@ -49,9 +49,9 @@ A professional, privacy-focused web application that removes backgrounds from im
 # Install dependencies
 pnpm install
 
-# Download U2-Net model (optional - for faster local development)
-# The production build automatically loads from CDN
-wget https://github.com/danielgatis/rembg/releases/download/v0.0.0/u2net.onnx -P public/models/
+# Download U²-Net (silueta) model (optional - for faster local development)
+# The production build automatically loads from the deployed models folder
+wget https://github.com/danielgatis/rembg/releases/download/v0.0.0/silueta.onnx -P public/models/
 
 # Start development server
 pnpm dev
@@ -66,7 +66,7 @@ pnpm preview
 
 > **Note**:
 > - **MediaPipe**: Works out of the box (loaded from CDN)
-> - **U2-Net**: Automatically loads from CDN in production. For local development, download the model file for faster loading (optional).
+> - **U²-Net**: Automatically loads from the packaged models in production. For local development, download `silueta.onnx` (optional).
 
 ## Deployment
 

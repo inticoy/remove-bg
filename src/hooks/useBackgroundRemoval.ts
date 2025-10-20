@@ -36,12 +36,23 @@ export const useBackgroundRemoval = (modelType: ModelType = 'u2net') => {
         setProgress(0);
         setError(null);
 
+        // Yield to the browser so the loading UI can render before heavy work
+        await new Promise<void>((resolve) => {
+          requestAnimationFrame(() => resolve());
+        });
+        setProgress((prev) => (prev < 5 ? 5 : prev));
+
         // Initialize service with progress tracking for model download
         if (!serviceRef.current.isInitialized()) {
           const onDownloadProgress = (loaded: number, total: number) => {
-            // Map download progress to 0-30% range
-            const downloadProgress = (loaded / total) * 30;
-            setProgress(downloadProgress);
+            if (total > 0) {
+              // Map download progress to 0-30% range
+              const downloadProgress = (loaded / total) * 30;
+              setProgress(downloadProgress);
+            } else {
+              // Unknown total size (e.g., some local files) – nudge progress gradually
+              setProgress((prev) => Math.min(prev + 5, 25));
+            }
           };
 
           await serviceRef.current.initialize(onDownloadProgress);

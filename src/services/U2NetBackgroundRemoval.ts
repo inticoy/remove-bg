@@ -12,7 +12,7 @@ const MODEL_INPUT_SIZE = 320; // U2-Net uses 320x320 input
 const MIN_VALID_MODEL_SIZE_BYTES = 1 * 1024 * 1024; // Guard against Git LFS pointers
 
 // Local model configuration
-const MODEL_FILE_NAME = import.meta.env.VITE_U2NET_LOCAL_MODEL ?? 'u2netp.onnx';
+const MODEL_FILE_NAME = import.meta.env.VITE_U2NET_LOCAL_MODEL ?? 'silueta.onnx';
 const LOCAL_MODEL_PATH = `${import.meta.env.BASE_URL}models/${MODEL_FILE_NAME}`;
 
 // Optional remote fallback (e.g. custom CDN)
@@ -57,13 +57,7 @@ export class U2NetBackgroundRemoval implements BackgroundRemovalService {
 
       try {
         console.log('Loading local model from:', LOCAL_MODEL_PATH);
-        const response = await fetch(LOCAL_MODEL_PATH);
-        if (!response.ok) {
-          throw new Error(`Local model request failed with status ${response.status}`);
-        }
-        const localBuffer = await response.arrayBuffer();
-        validateModelBuffer(localBuffer);
-        modelBuffer = localBuffer;
+        modelBuffer = await downloadModel(LOCAL_MODEL_PATH, onProgress, validateModelBuffer);
         console.log('Local model loaded successfully');
       } catch (localError) {
         console.warn('Local model unavailable or invalid:', localError);

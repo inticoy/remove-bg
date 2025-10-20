@@ -32,7 +32,10 @@ function App() {
     reset();
   };
 
-  const isProcessing = status === 'loading' || status === 'processing';
+  const isProcessing =
+    status === 'loading' ||
+    status === 'processing' ||
+    (!!selectedFile && status === 'idle');
   const isCompleted = status === 'completed' && result;
 
   return (
@@ -151,7 +154,11 @@ function App() {
 
                 <div>
                   <h3 className="text-2xl font-bold text-white text-shadow mb-2">
-                    {status === 'loading' ? 'Initializing AI...' : 'Processing Image...'}
+                    {status === 'loading'
+                      ? 'Initializing AI...'
+                      : status === 'processing'
+                      ? 'Processing Image...'
+                      : 'Preparing...'}
                   </h3>
                   <p className="text-white/70">Please wait while we work our magic</p>
                 </div>
