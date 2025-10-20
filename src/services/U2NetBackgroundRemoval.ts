@@ -11,11 +11,12 @@ import { downloadModel } from '@/utils/modelCache';
 const MODEL_INPUT_SIZE = 320; // U2-Net uses 320x320 input
 const MIN_VALID_MODEL_SIZE_BYTES = 1 * 1024 * 1024; // Guard against Git LFS pointers
 
-// Local model path (if downloaded with wget)
-const LOCAL_MODEL_PATH = `${import.meta.env.BASE_URL}models/u2net.onnx`;
+// Local model configuration
+const MODEL_FILE_NAME = import.meta.env.VITE_U2NET_LOCAL_MODEL ?? 'u2netp.onnx';
+const LOCAL_MODEL_PATH = `${import.meta.env.BASE_URL}models/${MODEL_FILE_NAME}`;
 
-// CDN model URL - same file as wget downloads (via unpkg for CORS)
-const CDN_MODEL_URL = 'https://media.githubusercontent.com/media/danielgatis/rembg/master/rembg/.u2net/u2net.onnx';
+// Optional remote fallback (e.g. custom CDN)
+const CDN_MODEL_URL = import.meta.env.VITE_U2NET_MODEL_URL;
 
 const GIT_LFS_SIGNATURE = 'https://git-lfs.github.com/spec/v1';
 
@@ -51,26 +52,28 @@ export class U2NetBackgroundRemoval implements BackgroundRemovalService {
       ort.env.wasm.numThreads = 1;
       ort.env.wasm.simd = true;
 
-      // Try loading from local file first, fallback to CDN
+      // Prefer the locally hosted model (works for dev + GitHub Pages)
       let modelBuffer: ArrayBuffer | null = null;
 
       try {
-        console.log('Trying to load local model from:', LOCAL_MODEL_PATH);
+        console.log('Loading local model from:', LOCAL_MODEL_PATH);
         const response = await fetch(LOCAL_MODEL_PATH);
         if (!response.ok) {
           throw new Error(`Local model request failed with status ${response.status}`);
         }
         const localBuffer = await response.arrayBuffer();
         validateModelBuffer(localBuffer);
-        console.log('Loading from local file...');
         modelBuffer = localBuffer;
+        console.log('Local model loaded successfully');
       } catch (localError) {
-        console.warn('Local model unavailable or invalid, falling back to CDN:', localError);
+        console.warn('Local model unavailable or invalid:', localError);
       }
 
       if (!modelBuffer) {
+        if (!CDN_MODEL_URL) {
+          throw new Error('Local model not found and no CDN fallback configured');
+        }
         console.log('Downloading model from CDN:', CDN_MODEL_URL);
-        // Download from CDN with caching
         modelBuffer = await downloadModel(CDN_MODEL_URL, onProgress, validateModelBuffer);
       }
 

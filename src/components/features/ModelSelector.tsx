@@ -30,7 +30,7 @@ const models: ModelInfo[] = [
   },
   {
     id: 'u2net',
-    name: 'U2-Net',
+    name: 'U²-Net',
     description: 'General Purpose',
     icon: '🎯',
     features: ['People & objects', 'High accuracy', 'Balanced speed'],
@@ -132,7 +132,7 @@ export const ModelSelector = ({
           />
         </svg>
         <span>
-          MediaPipe: Best for selfies and portraits • U2-Net: Best for products and general objects
+          MediaPipe: Best for selfies and portraits • U²-Net: Best for products and general objects
         </span>
       </div>
     </motion.div>

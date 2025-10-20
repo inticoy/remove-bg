@@ -6,18 +6,18 @@ This directory contains ONNX model files for background removal.
 
 ### Quick Setup (Recommended)
 
-Download the pre-converted U2-Net ONNX model:
+Download the lightweight pruned model (default in the app):
 
 ```bash
-# u2net.onnx (~176MB)
-wget https://github.com/danielgatis/rembg/releases/download/v0.0.0/u2net.onnx -P public/models/
+# u2netp.onnx (~45MB)
+wget https://github.com/danielgatis/rembg/releases/download/v0.0.0/u2netp.onnx -P public/models/
 ```
 
-Or use a smaller quantized version:
+Or use the quantized variant (slightly lower quality, similar size):
 
 ```bash
-# u2net_quant.onnx (~44MB, faster but slightly lower quality)
-wget https://github.com/danielgatis/rembg/releases/download/v0.0.0/u2net_quant.onnx -P public/models/
+# u2net_quant.onnx (~44MB)
+wget https://github.com/danielgatis/rembg/releases/download/v0.0.0/u2net_quant.onnx -O public/models/u2netp.onnx
 ```
 
 ### Alternative Sources
@@ -25,7 +25,7 @@ wget https://github.com/danielgatis/rembg/releases/download/v0.0.0/u2net_quant.o
 **From Hugging Face:**
 ```bash
 # Download from Hugging Face hub
-wget https://huggingface.co/briaai/RMBG-1.4/resolve/main/onnx/model.onnx -O public/models/u2net.onnx
+wget https://huggingface.co/briaai/RMBG-1.4/resolve/main/onnx/model.onnx -O public/models/u2netp.onnx
 ```
 
 **From ONNX Model Zoo:**
@@ -34,13 +34,13 @@ wget https://huggingface.co/briaai/RMBG-1.4/resolve/main/onnx/model.onnx -O publ
 
 ## Model Information
 
-### u2net.onnx
-- **Size**: ~176 MB
+### u2netp.onnx
+- **Size**: ~45 MB
 - **Input**: RGB image (3 channels)
 - **Input Shape**: [1, 3, 320, 320]
 - **Output**: Segmentation mask
 - **Use Case**: General purpose (people, objects, products)
-- **Quality**: High
+- **Quality**: High (slightly lighter backbone)
 - **Speed**: Medium
 
 ### u2net_quant.onnx
@@ -80,7 +80,7 @@ For production, host models on a CDN:
 
 Example in code:
 ```typescript
-const MODEL_URL = 'https://github.com/your-repo/releases/download/v1.0.0/u2net.onnx';
+const MODEL_URL = 'https://your-cdn.example.com/models/u2netp.onnx';
 ```
 
 ## License
