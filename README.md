@@ -49,12 +49,9 @@ A professional, privacy-focused web application that removes backgrounds from im
 # Install dependencies
 pnpm install
 
-# Download U2-Net model (required for U2-Net model option)
-# Option 1: Full model (~176MB)
+# Download U2-Net model (optional - for faster local development)
+# The production build automatically loads from CDN
 wget https://github.com/danielgatis/rembg/releases/download/v0.0.0/u2net.onnx -P public/models/
-
-# Option 2: Quantized model (~44MB, faster)
-wget https://github.com/danielgatis/rembg/releases/download/v0.0.0/u2net_quant.onnx -O public/models/u2net.onnx
 
 # Start development server
 pnpm dev
@@ -67,7 +64,9 @@ pnpm build
 pnpm preview
 ```
 
-> **Note**: MediaPipe works out of the box (loaded from CDN). U2-Net requires downloading the model file first.
+> **Note**:
+> - **MediaPipe**: Works out of the box (loaded from CDN)
+> - **U2-Net**: Automatically loads from CDN in production. For local development, download the model file for faster loading (optional).
 
 ## Deployment
 

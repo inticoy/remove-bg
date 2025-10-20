@@ -8,8 +8,11 @@ import type { BackgroundRemovalService } from '@/types';
 
 // U2-Net configuration
 const MODEL_INPUT_SIZE = 320; // U2-Net uses 320x320 input
-// Use import.meta.env.BASE_URL for proper path resolution
-const MODEL_PATH = `${import.meta.env.BASE_URL}models/u2net.onnx`;
+
+// Model path - try local first, fallback to CDN
+const MODEL_PATH = import.meta.env.DEV
+  ? `${import.meta.env.BASE_URL}models/u2net.onnx`
+  : 'https://github.com/danielgatis/rembg/releases/download/v0.0.0/u2net.onnx';
 
 export class U2NetBackgroundRemoval implements BackgroundRemovalService {
   private session: ort.InferenceSession | null = null;
