@@ -4,7 +4,7 @@ import path from 'path'
 import { copyFileSync, mkdirSync, existsSync } from 'fs'
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   plugins: [
     react(),
     {
@@ -45,7 +45,8 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
-  base: '/',
+  // Use / for dev, /remove-bg/ for production (GitHub Pages)
+  base: command === 'serve' ? '/' : '/remove-bg/',
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
@@ -59,4 +60,4 @@ export default defineConfig({
       allow: ['..']
     }
   }
-})
+}))

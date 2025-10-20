@@ -8,7 +8,8 @@ import type { BackgroundRemovalService } from '@/types';
 
 // U2-Net configuration
 const MODEL_INPUT_SIZE = 320; // U2-Net uses 320x320 input
-const MODEL_PATH = '/models/u2net.onnx';
+// Use import.meta.env.BASE_URL for proper path resolution
+const MODEL_PATH = `${import.meta.env.BASE_URL}models/u2net.onnx`;
 
 export class U2NetBackgroundRemoval implements BackgroundRemovalService {
   private session: ort.InferenceSession | null = null;
