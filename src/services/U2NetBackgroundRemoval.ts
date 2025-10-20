@@ -15,7 +15,7 @@ const MIN_VALID_MODEL_SIZE_BYTES = 1 * 1024 * 1024; // Guard against Git LFS poi
 const LOCAL_MODEL_PATH = `${import.meta.env.BASE_URL}models/u2net.onnx`;
 
 // CDN model URL - same file as wget downloads (via unpkg for CORS)
-const CDN_MODEL_URL = 'https://github.com/danielgatis/rembg/releases/download/v0.0.0/u2net.onnx';
+const CDN_MODEL_URL = 'https://media.githubusercontent.com/media/danielgatis/rembg/master/rembg/.u2net/u2net.onnx';
 
 const GIT_LFS_SIGNATURE = 'https://git-lfs.github.com/spec/v1';
 
