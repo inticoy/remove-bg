@@ -36,10 +36,16 @@ export const useBackgroundRemoval = (modelType: ModelType = 'u2net') => {
         setProgress(0);
         setError(null);
 
-        // Initialize service
+        // Initialize service with progress tracking for model download
         if (!serviceRef.current.isInitialized()) {
-          setProgress(20);
-          await serviceRef.current.initialize();
+          const onDownloadProgress = (loaded: number, total: number) => {
+            // Map download progress to 0-30% range
+            const downloadProgress = (loaded / total) * 30;
+            setProgress(downloadProgress);
+          };
+
+          await serviceRef.current.initialize(onDownloadProgress);
+          setProgress(35);
         }
 
         setStatus('processing');

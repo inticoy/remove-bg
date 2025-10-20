@@ -5,19 +5,22 @@
 
 import * as ort from 'onnxruntime-web';
 import type { BackgroundRemovalService } from '@/types';
+import { downloadModel } from '@/utils/modelCache';
 
 // U2-Net configuration
 const MODEL_INPUT_SIZE = 320; // U2-Net uses 320x320 input
 
-// Model path - for production, commit the model to GitHub and use the repo URL
-// This requires the model file to be committed to the repository
-const MODEL_PATH = `${import.meta.env.BASE_URL}models/u2net.onnx`;
+// Local model path (if downloaded with wget)
+const LOCAL_MODEL_PATH = `${import.meta.env.BASE_URL}models/u2net.onnx`;
+
+// CDN model URL - same file as wget downloads (via unpkg for CORS)
+const CDN_MODEL_URL = 'https://media.githubusercontent.com/media/danielgatis/rembg/master/rembg/.u2net/u2net.onnx';
 
 export class U2NetBackgroundRemoval implements BackgroundRemovalService {
   private session: ort.InferenceSession | null = null;
   private initialized = false;
 
-  async initialize(): Promise<void> {
+  async initialize(onProgress?: (loaded: number, total: number) => void): Promise<void> {
     if (this.initialized) return;
 
     try {
@@ -29,10 +32,28 @@ export class U2NetBackgroundRemoval implements BackgroundRemovalService {
       ort.env.wasm.numThreads = 1;
       ort.env.wasm.simd = true;
 
-      console.log('Loading U2-Net model from:', MODEL_PATH);
+      // Try loading from local file first, fallback to CDN
+      let modelBuffer: ArrayBuffer;
 
-      // Load the model with WASM backend only
-      this.session = await ort.InferenceSession.create(MODEL_PATH, {
+      try {
+        console.log('Trying to load local model from:', LOCAL_MODEL_PATH);
+        const response = await fetch(LOCAL_MODEL_PATH);
+        if (response.ok) {
+          console.log('Loading from local file...');
+          modelBuffer = await response.arrayBuffer();
+        } else {
+          throw new Error('Local model not found');
+        }
+      } catch (localError) {
+        console.log('Local model not available, downloading from CDN:', CDN_MODEL_URL);
+        // Download from CDN with caching
+        modelBuffer = await downloadModel(CDN_MODEL_URL, onProgress);
+      }
+
+      console.log('Model loaded, initializing session...');
+
+      // Load the model from ArrayBuffer
+      this.session = await ort.InferenceSession.create(modelBuffer, {
         executionProviders: ['wasm'],
         graphOptimizationLevel: 'all',
       });
@@ -43,7 +64,7 @@ export class U2NetBackgroundRemoval implements BackgroundRemovalService {
       console.log('Output names:', this.session.outputNames);
     } catch (error) {
       console.error('Failed to initialize U2-Net:', error);
-      throw new Error('Failed to initialize U2-Net model. Please ensure the model file is available.');
+      throw new Error('Failed to initialize U2-Net model. Download failed or model is corrupted.');
     }
   }
 

@@ -23,7 +23,7 @@ export interface BackgroundRemovalOptions {
 }
 
 export interface BackgroundRemovalService {
-  initialize(): Promise<void>;
+  initialize(onProgress?: (loaded: number, total: number) => void): Promise<void>;
   removeBackground(imageData: ImageData): Promise<ImageData>;
   cleanup(): void;
   isInitialized(): boolean;

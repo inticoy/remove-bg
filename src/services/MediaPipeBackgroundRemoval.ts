@@ -67,7 +67,7 @@ export class MediaPipeBackgroundRemoval implements BackgroundRemovalService {
     });
   }
 
-  async initialize(): Promise<void> {
+  async initialize(_onProgress?: (loaded: number, total: number) => void): Promise<void> {
     if (this.initialized) return;
 
     try {
