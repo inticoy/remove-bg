@@ -66,15 +66,23 @@ export const modelCache = new ModelCache();
 /**
  * Download model with progress callback
  */
+type ModelValidator = (buffer: ArrayBuffer) => void;
+
 export async function downloadModel(
   url: string,
-  onProgress?: (loaded: number, total: number) => void
+  onProgress?: (loaded: number, total: number) => void,
+  validate?: ModelValidator
 ): Promise<ArrayBuffer> {
   // Check cache first
   const cached = await modelCache.get(url);
   if (cached) {
-    console.log('Model loaded from cache');
-    return cached;
+    try {
+      if (validate) validate(cached);
+      console.log('Model loaded from cache');
+      return cached;
+    } catch (error) {
+      console.warn('Cached model failed validation, redownloading:', error);
+    }
   }
 
   console.log('Downloading model from:', url);
@@ -117,6 +125,10 @@ export async function downloadModel(
   }
 
   const arrayBuffer = allChunks.buffer;
+
+  if (validate) {
+    validate(arrayBuffer);
+  }
 
   // Cache for future use
   await modelCache.set(url, arrayBuffer);

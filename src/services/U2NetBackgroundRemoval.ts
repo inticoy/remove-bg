@@ -9,12 +9,31 @@ import { downloadModel } from '@/utils/modelCache';
 
 // U2-Net configuration
 const MODEL_INPUT_SIZE = 320; // U2-Net uses 320x320 input
+const MIN_VALID_MODEL_SIZE_BYTES = 1 * 1024 * 1024; // Guard against Git LFS pointers
 
 // Local model path (if downloaded with wget)
 const LOCAL_MODEL_PATH = `${import.meta.env.BASE_URL}models/u2net.onnx`;
 
 // CDN model URL - same file as wget downloads (via unpkg for CORS)
-const CDN_MODEL_URL = 'https://media.githubusercontent.com/media/danielgatis/rembg/master/rembg/.u2net/u2net.onnx';
+const CDN_MODEL_URL = 'https://github.com/danielgatis/rembg/releases/download/v0.0.0/u2net.onnx';
+
+const GIT_LFS_SIGNATURE = 'https://git-lfs.github.com/spec/v1';
+
+const isGitLfsPointer = (buffer: ArrayBuffer): boolean => {
+  const slice = buffer.slice(0, Math.min(buffer.byteLength, 256));
+  const text = new TextDecoder('utf-8', { fatal: false }).decode(slice).toLowerCase();
+  return text.includes('version') && text.includes(GIT_LFS_SIGNATURE);
+};
+
+const validateModelBuffer = (buffer: ArrayBuffer): void => {
+  if (buffer.byteLength < MIN_VALID_MODEL_SIZE_BYTES) {
+    throw new Error(`Model buffer too small (${buffer.byteLength} bytes)`);
+  }
+
+  if (isGitLfsPointer(buffer)) {
+    throw new Error('Model buffer appears to be a Git LFS pointer');
+  }
+};
 
 export class U2NetBackgroundRemoval implements BackgroundRemovalService {
   private session: ort.InferenceSession | null = null;
@@ -33,21 +52,26 @@ export class U2NetBackgroundRemoval implements BackgroundRemovalService {
       ort.env.wasm.simd = true;
 
       // Try loading from local file first, fallback to CDN
-      let modelBuffer: ArrayBuffer;
+      let modelBuffer: ArrayBuffer | null = null;
 
       try {
         console.log('Trying to load local model from:', LOCAL_MODEL_PATH);
         const response = await fetch(LOCAL_MODEL_PATH);
-        if (response.ok) {
-          console.log('Loading from local file...');
-          modelBuffer = await response.arrayBuffer();
-        } else {
-          throw new Error('Local model not found');
+        if (!response.ok) {
+          throw new Error(`Local model request failed with status ${response.status}`);
         }
+        const localBuffer = await response.arrayBuffer();
+        validateModelBuffer(localBuffer);
+        console.log('Loading from local file...');
+        modelBuffer = localBuffer;
       } catch (localError) {
-        console.log('Local model not available, downloading from CDN:', CDN_MODEL_URL);
+        console.warn('Local model unavailable or invalid, falling back to CDN:', localError);
+      }
+
+      if (!modelBuffer) {
+        console.log('Downloading model from CDN:', CDN_MODEL_URL);
         // Download from CDN with caching
-        modelBuffer = await downloadModel(CDN_MODEL_URL, onProgress);
+        modelBuffer = await downloadModel(CDN_MODEL_URL, onProgress, validateModelBuffer);
       }
 
       console.log('Model loaded, initializing session...');
