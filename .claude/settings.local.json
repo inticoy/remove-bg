@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm create vite . --template react-ts)",
+      "Bash(pnpm install)",
+      "Bash(pnpm dev)",
+      "Bash(pnpm build)",
+      "Bash(tree -I 'node_modules|dist' -L 3)",
+      "Bash(cat package.json)",
+      "Bash(pnpm list onnxruntime-web)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
